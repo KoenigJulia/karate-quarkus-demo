@@ -52,7 +52,7 @@ public class BookResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}")
+    @Path("/book/{id}")
     public Response getBookById(@PathParam("id") Long id){
         Book book = bookRepository.findById(id);
         return Response
