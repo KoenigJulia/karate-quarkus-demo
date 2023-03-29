@@ -1,0 +1,153 @@
+= Systemtest mit Karate
+Julia König
+1.0.0, 2021-12-21:
+ifndef::imagesdir[:imagesdir: images]
+//:toc-placement!:  // prevents the generation of the doc at this position, so it can be printed afterwards
+:sourcedir: ../src/main/java
+:icons: font
+:sectnums:    // Nummerierung der Überschriften / section numbering
+:toc: left
+
+//Need this blank line after ifdef, don't know why...
+ifdef::backend-html5[]
+
+== Unterschied End-To-End Test und Systemtest
+End-To-End Test: End-to-End-Tests sind eine Art von Softwaretests , mit denen getestet wird,
+ob sich der Fluss einer Software von der Anfangsphase bis zur Endphase wie erwartet verhält.
+Der Zweck von End-to-End-Tests besteht darin, Systemabhängigkeiten zu identifizieren und sicherzustellen,
+dass die Datenintegrität zwischen verschiedenen Systemkomponenten und Systemen gewahrt bleibt.
+
+Systemtest: Systemtests werden für das gesamte System entweder im Kontext von Systemanforderungsspezifikationen
+oder funktionalen Anforderungsspezifikationen oder in Anlehnung an beide durchgeführt. Systemtests testen das Design
+und Verhalten des Systems sowie die Erwartungen des Kunden.
+
+== Beispiel
+
+1. pom.xml anpassen
+[source,text]
+----
+    <dependency>
+      <groupId>com.intuit.karate</groupId>
+      <artifactId>karate-apache</artifactId>
+      <version>0.9.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.intuit.karate</groupId>
+      <artifactId>karate-junit5</artifactId>
+      <version>0.9.5</version>
+      <scope>test</scope>
+    </dependency>
+----
+2. karate-config.js erstellen
+[source,js]
+----
+function fn() {
+    var env = karate.env; // get java system property 'karate.env'
+    karate.log('karate.env system property was:', env);
+    if (!env) {
+        env = 'dev'; // a custom 'intelligent' default
+    }
+    var config = { // base config JSON
+        baseUrl: 'http://localhost:8080'
+    };
+    // don't waste time waiting for a connection or if servers don't respond within 5 seconds
+    karate.configure('connectTimeout', 5000);
+    karate.configure('readTimeout', 5000);
+    return config;
+}
+----
+
+3. Plugin => Karate-Tests in der IDE ausführen
+IntelliJ => Bei Plugins nach Karate suchen
+
+4. Test erstellen (Beispiel)
+Datei: src/test/java/at/htl/features/book.feature
+
+[source,karate]
+----
+Feature: BookResource
+
+  @post
+  Scenario: Create new book with new author and get it and then delete (included author) it
+    Given url "http://localhost:8080/books/create"
+    And request {"author": {"firstName": "Patrick Radden", "lastName": "Keefe"},"title": "Empire of Pain","imageUrl": "https://api.time.com/wp-content/uploads/2021/11/100-best-books-empire-of-pain.jpg?quality=85&w=1600"}
+    When method post
+    Then status 201
+    Given url "http://localhost:8080/books/"
+    And path "Empire of Pain"
+    When method get
+    Then status 200
+    And match $ == {"id": "#number", "title": "Empire of Pain", "imageUrl": "https://api.time.com/wp-content/uploads/2021/11/100-best-books-empire-of-pain.jpg?quality=85&w=1600", "author": {"id": "#number", "firstName": "Patrick Radden", "lastName": "Keefe"}}
+    Given url "http://localhost:8080/books/delete"
+    And request "Empire of Pain"
+    When method delete
+    Then status 200
+    And match $ == true
+----
+
+== Karate
+image:karateoverview.png[]
+
+Karate verwendet Gherkin als Basis für Test. Daher sind die Dateien auch mit *.feature gekennzeichnet.
+Bei Karate besteht die Möglichkeit Tests parallel auszuführen.
+Dies spart einiges an Zeit.
+
+=== Variablen in Karate für Tests
+[source,karate]
+
+=== Test Möglichkeiten
+* Desktop App Automation
+* Performance Testing
+* Mock Servlet
+* Web Browser Automation
+* API Test Doubles
+* API Testing
+
+=== Variablen in Karate
+Karate bietet die Möglichkeit für Tests Variablen zu definieren.
+Vor ein Definition des Szenarios wird der Begriff Background geschrieben.
+Dieser Bereich definiert einen "versteckten" Bereich der nicht in den Testbericht aufgenommen wird.
+Mit "*" wird eine Variable definiert.
+Dies funktioniert wie folgt:
+
+[source,karate]
+----
+Background:
+    * url "https://jsonplaceholder.typicode.com/"
+
+Scenario Outline: Given user ID, validate company name
+    Given path "users", <id>
+    When method get
+    Then status 200
+    And match response.company.name == "<companyName>"
+----
+
+=== Tags
+Tests, also Szenarios können mit Tags versehen werden.
+Somit ist es möglich gleichartige Tests zu Gruppieren und diese gemeinsam zum Beispiel aus einem Java test auszuführen.
+In folgendem Beispiel ist @post ein Tag, der dem Test zugewiesen wurde.
+
+[source,karate]
+----
+  @post
+  Scenario: Create new book with new author and get it and then delete (included author) it
+    Given url "http://localhost:8080/books/create"
+    And request {"author": {"firstName": "Patrick Radden", "lastName": "Keefe"},"title": "Empire of Pain","imageUrl": "https://api.time.com/wp-content/uploads/2021/11/100-best-books-empire-of-pain.jpg?quality=85&w=1600"}
+    When method post
+    Then status 201
+----
+
+=== Karate Test mit Quarkus-Tests ausführen
+Um Karate Tests mit Quarkus und somit Continuous Integrated Testing von Quarkus zu nutzen, besteht die Möglichkeit einen normalen Quarkus Test zu erstellen, der die Karate Tests ausführt.
+
+[source,java]
+----
+@QuarkusTest
+class TestRunner {
+    @Karate.Test
+    Karate testAll() {
+        return Karate.run("book").relativeTo(getClass());
+    }
+}
+----

@@ -26,6 +26,13 @@ Feature: BookResource
 
   @get
   Scenario: Get book by id
+    Given url "http://localhost:8080/books/book/2"
+    When method get
+    Then status 200
+    And match $ == {"id": 3, "title": "Tribute von Panem Tödliche Spiele", "imageUrl": "https://m.media-amazon.com/images/I/51Vn6qGi6bL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg", "author": {"id": 2, "firstName": "Suzanne", "lastName": "Collins"}}
+
+  @get
+  Scenario: Get book by id
     Given url "http://localhost:8080/books/book/3"
     When method get
     Then status 200
