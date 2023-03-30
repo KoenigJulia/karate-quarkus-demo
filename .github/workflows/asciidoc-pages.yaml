@@ -49,6 +49,5 @@ jobs:
           pdf_build: false
           # adoc_file_ext: .ascii # default is .adoc
           source_dir: ${{ github.workspace }}/asciidocs/ # default is .
-          slides_build: true
           # pre_build:
           # post_build:
