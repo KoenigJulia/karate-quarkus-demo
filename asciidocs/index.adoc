@@ -23,7 +23,7 @@ und Verhalten des Systems sowie die Erwartungen des Kunden.
 
 == Beispiel
 
-1. pom.xml anpassen
+1.pom.xml anpassen
 [source,text]
 ----
     <dependency>
@@ -39,7 +39,7 @@ und Verhalten des Systems sowie die Erwartungen des Kunden.
       <scope>test</scope>
     </dependency>
 ----
-2. karate-config.js erstellen
+2.karate-config.js erstellen
 [source,js]
 ----
 function fn() {
@@ -58,10 +58,10 @@ function fn() {
 }
 ----
 
-3. Plugin => Karate-Tests in der IDE ausführen
+3.Plugin => Karate-Tests in der IDE ausführen
 IntelliJ => Bei Plugins nach Karate suchen
 
-4. Test erstellen (Beispiel)
+4.Test erstellen (Beispiel)
 Datei: src/test/java/at/htl/features/book.feature
 
 [source,karate]
