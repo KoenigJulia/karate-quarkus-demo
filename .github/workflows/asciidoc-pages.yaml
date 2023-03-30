@@ -51,6 +51,5 @@ jobs:
           # adoc_file_ext: .ascii # default is .adoc
           source_dir: ${{ github.workspace }}/asciidocs/ # default is .
           slides_build: true
-          slides_main_adoc_file: slides/presentation
           # pre_build:
           # post_build:
