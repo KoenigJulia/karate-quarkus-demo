@@ -44,7 +44,6 @@ jobs:
             -a sectanchors=true
             -a sectnums=true
             -a favicon=themes/favicon.png
-            -a sourcedir=src/main/java
             -b html5
           post_build: "git add -f *.png"
           pdf_build: false
